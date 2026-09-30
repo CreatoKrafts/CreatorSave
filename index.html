@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Creator Save is a local-first Chrome extension for organizing Instagram inspiration you can already access in your browser."
+    />
+    <title>Creator Save — Local-first creator utility</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #16142f;
+        --muted: #5d5a76;
+        --canvas: #fffdf7;
+        --surface: #ffffff;
+        --purple: #6848e8;
+        --purple-soft: #eeeaff;
+        --yellow: #ffd45c;
+        --line: #dad4ed;
+        --shadow: 0 18px 44px rgba(33, 26, 75, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        min-width: 320px;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 88% 8%, #e8ddff 0, transparent 25rem),
+          radial-gradient(circle at 8% 88%, #fff0bb 0, transparent 23rem),
+          var(--canvas);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+
+      a { color: inherit; }
+      .site-shell { width: min(100% - 2rem, 960px); margin: 0 auto; }
+      .skip-link { position: absolute; left: -999px; top: 0; }
+      .skip-link:focus { left: 1rem; z-index: 10; padding: .75rem 1rem; color: #fff; background: var(--ink); border-radius: .5rem; }
+
+      header { padding: 2.2rem 0 1.2rem; }
+      .brand { display: inline-flex; align-items: center; gap: .7rem; text-decoration: none; font-weight: 800; font-size: 1.15rem; }
+      .brand-mark {
+        display: grid; place-items: center; width: 2.45rem; height: 2.45rem;
+        color: #fff; background: var(--purple); border: 3px solid var(--ink); border-radius: .75rem;
+        box-shadow: 4px 4px 0 var(--yellow); font-size: 1rem;
+      }
+
+      main { padding: 1.5rem 0 4rem; }
+      .hero { padding: 2.5rem 0 2.2rem; max-width: 760px; }
+      .eyebrow { margin: 0 0 .75rem; color: var(--purple); font-size: .82rem; font-weight: 850; letter-spacing: .11em; text-transform: uppercase; }
+      h1 { margin: 0; max-width: 760px; font-size: clamp(2.45rem, 7vw, 4.65rem); line-height: .98; letter-spacing: -.065em; }
+      .hero p { max-width: 650px; margin: 1.35rem 0 0; color: var(--muted); font-size: clamp(1.05rem, 2vw, 1.25rem); }
+      .pill { display: inline-block; margin-top: 1.35rem; padding: .38rem .75rem; color: #36298a; background: var(--purple-soft); border: 1px solid #c6bafa; border-radius: 999px; font-weight: 700; font-size: .9rem; }
+
+      .tabs { overflow: hidden; background: var(--surface); border: 2px solid var(--ink); border-radius: 1.25rem; box-shadow: var(--shadow); }
+      [role="tablist"] { display: flex; gap: .35rem; padding: .6rem; overflow-x: auto; background: #f7f4ff; border-bottom: 1px solid var(--line); }
+      [role="tab"] {
+        flex: 1 0 auto; padding: .75rem 1rem; color: var(--ink); background: transparent; border: 2px solid transparent;
+        border-radius: .7rem; cursor: pointer; font: inherit; font-weight: 800;
+      }
+      [role="tab"][aria-selected="true"] { background: var(--surface); border-color: var(--ink); box-shadow: 3px 3px 0 var(--yellow); }
+      [role="tab"]:focus-visible, a:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
+      [role="tabpanel"] { padding: clamp(1.4rem, 4vw, 2.8rem); }
+      [role="tabpanel"][hidden] { display: none; }
+      h2 { margin: 0 0 .65rem; font-size: clamp(1.55rem, 4vw, 2.1rem); letter-spacing: -.04em; }
+      h3 { margin: 0; font-size: 1.05rem; }
+      p { margin: .45rem 0; }
+      .lead { max-width: 680px; color: var(--muted); font-size: 1.06rem; }
+      .feature-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.75rem; }
+      .feature { padding: 1.1rem; background: #fffcf1; border: 1px solid var(--line); border-radius: .9rem; }
+      .feature span { display: block; margin-bottom: .55rem; font-size: 1.25rem; }
+      .feature p { color: var(--muted); font-size: .95rem; }
+      .notice { margin-top: 1.5rem; padding: 1rem 1.1rem; background: var(--purple-soft); border-left: 5px solid var(--purple); border-radius: .5rem; color: #33286f; }
+      .privacy-list { display: grid; gap: .85rem; margin: 1.5rem 0 0; padding: 0; list-style: none; }
+      .privacy-list li { padding: .9rem 1rem; border: 1px solid var(--line); border-radius: .75rem; background: #fff; }
+      .privacy-list strong { display: block; margin-bottom: .15rem; }
+      .contact-card { max-width: 680px; padding: 1.35rem; margin-top: 1.5rem; background: #fffcf1; border: 2px solid var(--ink); border-radius: 1rem; }
+      .contact-card a { color: #4b31c7; font-weight: 800; }
+      .replace { display: inline-block; padding: .08rem .35rem; color: #3d2d93; background: #eeeaff; border-radius: .25rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+      .made-with-love { margin-top: 1.5rem; padding: 1rem 1.1rem; background: #fff5c9; border: 1px solid #efc840; border-radius: .75rem; }
+      .publisher { margin-top: 1rem; padding-top: 1.1rem; border-top: 1px solid var(--line); color: var(--muted); }
+      .publisher strong { color: var(--ink); }
+      footer { padding: 0 0 2.5rem; color: var(--muted); font-size: .9rem; }
+
+      @media (max-width: 640px) {
+        .feature-grid { grid-template-columns: 1fr; }
+        [role="tabpanel"] { padding: 1.3rem; }
+      }
+
+      @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" href="#content">Skip to content</a>
+    <header class="site-shell">
+      <a class="brand" href="#top" aria-label="Creator Save home">
+        <span class="brand-mark" aria-hidden="true">↓</span>
+        <span>Creator Save</span>
+      </a>
+    </header>
+
+    <main class="site-shell" id="content">
+      <section class="hero" id="top" aria-labelledby="page-title">
+        <p class="eyebrow">Local-first creator utility</p>
+        <h1 id="page-title">Save the ideas you want to come back to.</h1>
+        <p>Creator Save helps you organize inspiration from Instagram content you can already access in your browser.</p>
+        <span class="pill">No account required · No analytics</span>
+      </section>
+
+      <section class="tabs" aria-label="Creator Save information">
+        <div role="tablist" aria-label="Information sections">
+          <button id="tab-about" role="tab" aria-selected="true" aria-controls="panel-about" tabindex="0">About</button>
+          <button id="tab-privacy" role="tab" aria-selected="false" aria-controls="panel-privacy" tabindex="-1">Privacy</button>
+          <button id="tab-contact" role="tab" aria-selected="false" aria-controls="panel-contact" tabindex="-1">Contact</button>
+        </div>
+
+        <section id="panel-about" role="tabpanel" tabindex="0" aria-labelledby="tab-about">
+          <h2>About Creator Save</h2>
+          <p class="lead">A practical Chrome extension for saving and organizing accessible Instagram inspiration for personal research and creative work.</p>
+          <div class="feature-grid">
+            <article class="feature"><span aria-hidden="true">↓</span><h3>User-initiated downloads</h3><p>Download media already accessible to you, including supported images, videos, Reels, carousel items, and available thumbnails.</p></article>
+            <article class="feature"><span aria-hidden="true">✦</span><h3>Inspiration collections</h3><p>Save references with captions, hashtags, notes, tags, and collection organization.</p></article>
+            <article class="feature"><span aria-hidden="true">◷</span><h3>Local history</h3><p>Keep a local record of downloads, with smart filenames and duplicate reminders.</p></article>
+            <article class="feature"><span aria-hidden="true">⌘</span><h3>Copy useful context</h3><p>Copy a post caption, its hashtags, or its canonical link when available.</p></article>
+          </div>
+          <p class="notice"><strong>Independent product:</strong> Creator Save is not affiliated with, endorsed by, or sponsored by Instagram or Meta.</p>
+        </section>
+
+        <section id="panel-privacy" role="tabpanel" tabindex="0" aria-labelledby="tab-privacy" hidden>
+          <h2>Privacy</h2>
+          <p class="lead">Creator Save is designed to keep your extension data local to your browser.</p>
+          <ul class="privacy-list">
+            <li><strong>Stored locally</strong> Settings, collections, saved-inspiration metadata, and download history are stored in Chrome’s local extension storage in your current browser profile.</li>
+            <li><strong>No Creator Save account</strong> The extension has no account system, analytics SDK, backend, telemetry endpoint, or code that uploads Creator Save data.</li>
+            <li><strong>No Instagram credentials</strong> Creator Save does not store Instagram usernames, passwords, or session credentials.</li>
+            <li><strong>Media stays subject to normal browser access</strong> When you choose to download media or display a saved thumbnail, Chrome may request an existing Instagram CDN URL in the normal way. Those requests go to Instagram/Meta infrastructure, not Creator Save.</li>
+            <li><strong>Exports are your choice</strong> Backups are exported only when you choose Export. Imports are parsed and validated locally.</li>
+          </ul>
+        </section>
+
+        <section id="panel-contact" role="tabpanel" tabindex="0" aria-labelledby="tab-contact" hidden>
+          <h2>Contact</h2>
+          <p class="lead">Questions, feedback, and bug reports are welcome.</p>
+          <div class="contact-card">
+            <h3>Email</h3>
+            <p><a href="mailto:YOUR_EMAIL@example.com">YOUR_EMAIL@example.com</a></p>
+            <p>Before publishing, replace <span class="replace">YOUR_EMAIL@example.com</span> everywhere in this file with your support email address.</p>
+          </div>
+          <p class="notice">When reporting a problem, please include your Chrome version, extension version, and a brief description of what happened. Do not send passwords, session cookies, or private account information.</p>
+          <p class="made-with-love">Made with love, healthy curiosity, and one too many saved posts — for Instagram users who know “I’ll remember this later” is not a workflow. 💜</p>
+          <div class="publisher">
+            <strong>Published by CreatoKrafts</strong><br />
+            An AI &amp; Digital Media company creating practical, imaginative tools for modern creators.
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <footer class="site-shell">Creator Save v1.0.0 · Local-first creator utility</footer>
+
+    <script>
+      const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
+      const panels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+
+      function selectTab(tab) {
+        tabs.forEach((item) => {
+          const selected = item === tab;
+          item.setAttribute('aria-selected', String(selected));
+          item.tabIndex = selected ? 0 : -1;
+        });
+        panels.forEach((panel) => {
+          panel.hidden = panel.getAttribute('aria-labelledby') !== tab.id;
+        });
+      }
+
+      tabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => selectTab(tab));
+        tab.addEventListener('keydown', (event) => {
+          if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+          event.preventDefault();
+          let next = index;
+          if (event.key === 'ArrowRight') next = (index + 1) % tabs.length;
+          if (event.key === 'ArrowLeft') next = (index - 1 + tabs.length) % tabs.length;
+          if (event.key === 'Home') next = 0;
+          if (event.key === 'End') next = tabs.length - 1;
+          tabs[next].focus();
+          selectTab(tabs[next]);
+        });
+      });
+    </script>
+  </body>
+</html>
